@@ -2,13 +2,13 @@ from __future__ import print_function
 import datetime
 import os.path
 import sys
+import locale
 from datetime import datetime
 from googleapiclient.discovery import build
 from google.oauth2 import service_account
 from google.auth.transport.requests import Request
-from flask import Flask, flash, jsonify, redirect, render_template, request, session
-from flask_session import Session
-from tempfile import mkdtemp
+
+from flask import Flask, flash, jsonify, redirect, render_template, request
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -21,9 +21,16 @@ app = Flask(__name__)
 # Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 
+# Set Language to Local
+locale.setlocale(locale.LC_ALL, '')
+
 @app.route("/")
 def index():
-    return render_template("index.html", eventlist=get_dates(10))
+    performer = {}
+    performer["name"] = "Marcus Merkel"
+    performer["givenName"] = "Marcus"
+    performer["familyName"] = "Merkel"
+    return render_template("index.html", eventList=get_dates(20), performer=performer)
 
 # Getting the list of maximum <max_number> events
 def get_dates(max_number):
@@ -45,7 +52,7 @@ def get_dates(max_number):
         print('No upcoming events found.')
         return
         
-    eventlist = []
+    eventList = []
 
     for event in events:
         evnt = {}
@@ -53,18 +60,50 @@ def get_dates(max_number):
         # .get() tries to get first argument value from dictionary, second argument is alternative!
         start = event['start'].get('dateTime', event['start'].get('date'))
         start_dttm = datetime.fromisoformat(start)
+
+        end = event['end'].get('dateTime', event['end'].get('date'))
+        end_dttm = datetime.fromisoformat(end)
+
+        evnt['start_dttm_iso'] = start
         evnt['start_date'] = start_dttm.date().strftime("%d.%m.%Y")
+        evnt['start_day'] = start_dttm.date().strftime("%-d")
+        evnt['start_month'] = start_dttm.date().strftime("%b")
         evnt['start_time'] = start_dttm.time().strftime("%H:%M")
+        evnt['start_weekday'] = start_dttm.time().strftime("%A")
+        evnt['end_dttm_iso'] = end
+        evnt['end_time'] = end_dttm.time().strftime("%H:%M")
+
         evnt['title'] = event['summary']
         evnt['description'] = event['description']
+        desc = event['description']
+        if "Operette" in desc:
+            evnt['type'] = "Operette"
+        elif "Musical" in desc:
+            evnt['type'] = "Musical"
+        elif "Konzert" in desc:
+            evnt['type'] = "Konzert"
+        elif "Kammer" in desc:
+            evnt['type'] = "Kammermusik"
+        elif "Lieder" in desc:
+            evnt['type'] = "Lied"
+        elif "Oper" in desc and not "Operette" in desc:
+            evnt['type'] = "Oper"
+
+        evnt['opus'] = ""
+        for word in event['summary'].split(" "):
+            if word.isupper():
+                evnt['opus'] = evnt['opus'] + word + " "
+
         evnt['location'] = event['location']
+        evnt['locationName'] = event['location'].split(", ", 1)[0]
+        evnt['locationAddress'] = event['location'].split(", ", 1)[1]
 
-        eventlist.append(evnt)
+        eventList.append(evnt)
 
-    for event in eventlist:
-        print(event)
+    for event in eventList:
+        print(event['opus'])
 
-    return eventlist
+    return eventList
 
 if __name__ == '__main__':
     app.debug = True
