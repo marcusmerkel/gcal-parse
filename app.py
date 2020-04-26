@@ -43,9 +43,7 @@ def get_dates(max_number):
     # Call the Calendar API
     now = datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
     print('Getting the upcoming', max_number, 'events')
-    events_result = service.events().list(calendarId='8mkdbklaaet84afcnf0v4kvjcs@group.calendar.google.com', timeMin=now,
-                                        maxResults=max_number, singleEvents=True,
-                                        orderBy='startTime').execute()
+    events_result = service.events().list(calendarId='8mkdbklaaet84afcnf0v4kvjcs@group.calendar.google.com', timeMin=now, maxResults=max_number, singleEvents=True, orderBy='startTime').execute() # pylint: disable=maybe-no-member
     events = events_result.get('items', [])
 
     if not events:
@@ -64,39 +62,55 @@ def get_dates(max_number):
         end = event['end'].get('dateTime', event['end'].get('date'))
         end_dttm = datetime.fromisoformat(end)
 
+        starttime = event['start'].get('time')
+
         evnt['start_dttm_iso'] = start
         evnt['start_date'] = start_dttm.date().strftime("%d.%m.%Y")
         evnt['start_day'] = start_dttm.date().strftime("%-d")
         evnt['start_month'] = start_dttm.date().strftime("%b")
-        evnt['start_time'] = start_dttm.time().strftime("%H:%M")
-        evnt['start_weekday'] = start_dttm.time().strftime("%A")
         evnt['end_dttm_iso'] = end
-        evnt['end_time'] = end_dttm.time().strftime("%H:%M")
+        evnt['start_weekday'] = start_dttm.time().strftime("%A")
+        if not starttime:
+            evnt['start_time'] = "00:00"
+            evnt['end_time'] = "23:59"
+        else:
+            evnt['start_time'] = start_dttm.time().strftime("%H:%M")
+            evnt['end_time'] = end_dttm.time().strftime("%H:%M")
 
         evnt['title'] = event['summary']
-        evnt['description'] = event['description']
-        desc = event['description']
-        if "Operette" in desc:
-            evnt['type'] = "Operette"
-        elif "Musical" in desc:
-            evnt['type'] = "Musical"
-        elif "Konzert" in desc:
-            evnt['type'] = "Konzert"
-        elif "Kammer" in desc:
-            evnt['type'] = "Kammermusik"
-        elif "Lieder" in desc:
-            evnt['type'] = "Lied"
-        elif "Oper" in desc and not "Operette" in desc:
-            evnt['type'] = "Oper"
+
+        if 'description' in event.keys():
+            evnt['description'] = event['description'].replace("\n\n\n", "\n\n")
+            desc = event['description']
+            if "Operette" in desc:
+                evnt['type'] = "Operette"
+            elif "Musical" in desc:
+                evnt['type'] = "Musical"
+            elif "Konzert" in desc:
+                evnt['type'] = "Konzert"
+            elif "Kammer" in desc:
+                evnt['type'] = "Kammermusik"
+            elif "Lieder" in desc:
+                evnt['type'] = "Lied"
+            elif "Oper" in desc and not "Operette" in desc:
+                evnt['type'] = "Oper"
+        else:
+            evnt['description'] = event['summary']
+            evnt['type'] = ""
 
         evnt['opus'] = ""
         for word in event['summary'].split(" "):
             if word.isupper():
                 evnt['opus'] = evnt['opus'] + word + " "
 
-        evnt['location'] = event['location']
-        evnt['locationName'] = event['location'].split(", ", 1)[0]
-        evnt['locationAddress'] = event['location'].split(", ", 1)[1]
+        if not 'location' in event.keys():
+            evnt['location'] = ""
+        else:
+            loc = event['location']
+            evnt['location'] = loc
+            evnt['locationName'] = loc.split(", ", 1)[0]
+            evnt['locationAddress'] = loc.split(", ", 1)[1]
+            evnt['locationMapsSearch'] = "https://google.com/maps/search/" + evnt['locationName'].replace(" ", "+")
 
         eventList.append(evnt)
 
