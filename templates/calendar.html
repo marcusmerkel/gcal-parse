@@ -13,11 +13,8 @@
             <span itemprop="name">{{ event['title'] }}</span>
             <span itemprop="startDate">{{ event['start_dttm_iso'] }}</span>
             <span itemprop="endDate">{{ event['end_dttm_iso'] }}</span>
-            
-            <span itemprop="image" content=""></span> <!-- TODO -->
-            
+                        
             <span itemprop="description">{{ event['description'] }}</span>
-            <span itemprop="url" content=""></span> <!-- TODO -->
     
             {% if performer['name'] != "" %}
             <span itemprop="performer" itemscope="" itemtype="http://schema.org/Person">
