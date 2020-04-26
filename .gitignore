@@ -1,0 +1,11 @@
+node_modules
+private_key
+build
+.vscode
+__pycache__
+virtual
+config.codekit3
+credentials.json
+package-lock.json
+package.json
+token.pickle

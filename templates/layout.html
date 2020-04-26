@@ -11,6 +11,18 @@
     <title>{% block title %}{% endblock %}</title>
 </head>
 <body>
+    <nav class="navbar navbar-expand-sm navbar-light bg-light border">
+        <p class="navbar-brand my-auto">Google Calendar Parser</p>
+        <div id="navbar" class="collapse navbar-collapse">
+            <ul class="navbar-nav my-auto mr-auto">
+                <li class="nav-item"><p class="mb-0">Made by <a href="http://www.marcusmerkel.de" target="_blank">Marcus Merkel</a> as Final Project for CS50</p></li>
+            </ul>
+            <ul class="navbar-nav my-auto ml-auto"> 
+                <li class="nav-item"><a class="mb-0" href="https://github.com/marcusmerkel/gcal-parse/" target="_blank">See on GitHub</a></li>
+            </ul>    
+        </div>
+    </nav>
+
     {% block main %}
     {% endblock %}
     

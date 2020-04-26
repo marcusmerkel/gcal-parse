@@ -5,105 +5,106 @@
 {% endblock %}
 
 {% block main %}
-<div class="container calendar-list bg-white pattern-cross-dots-md py-1 mx-auto">
-{% for event in eventList %}
-
-    <div id="{{ event['start_dttm_iso']}}" class="container calendar-list-item shadow-sm p-3 my-3 bg-white rounded">
-        <div class="metadata" itemscope="" itemtype="http://schema.org/Event">
-            <span itemprop="name">{{ event['title'] }}</span>
-            <span itemprop="startDate">{{ event['start_dttm_iso'] }}</span>
-            <span itemprop="endDate">{{ event['end_dttm_iso'] }}</span>
-            
-            <span itemprop="image" content=""></span> <!-- TODO -->
-            
-            <span itemprop="description">{{ event['description'] }}</span>
-            <span itemprop="url" content=""></span> <!-- TODO -->
-    
-            <span itemprop="performer" itemscope="" itemtype="http://schema.org/Person">
-                <span itemprop="name">{{ performer['name'] }}</span>
-                <span itemprop="givenName">{{ performer['givenName'] }}</span>
-                <span itemprop="familyName">{{ performer['familyName'] }}</span>
-            </span>
-    
-            <span itemprop="location" itemscope="" itemtype="http://schema.org/Place">
-                <span itemprop="name">{{ event['locationName'] }}</span>
-                <span itemprop="address">{{ event['locationAddress'] }}</span>      
-            </span>
-        </div>
-        <div class="row align-items-center">
-            <div class="event-date h-auto col-2 col-xs-2 col-sm-2 col-md-2 align-middle mt-2">
-                <div class="align-self-center">
-                    <span class="h1 d-block text-center">{{ event['start_day'] }}</span>
-                    <span class="h5 d-block text-center">{{ event['start_month'] }}</span>
+<div class="container-md mt-5">
+    <h1 class="display-4 text-center mb-2">This is Google Calendar Parser.</h1>
+    <p class="text-center mb-5 lead">- a beautiful way to put an event list fed by a Google Calendar into your html page.</p>
+    <p class="text-center my-3">Made by Marcus Merkel for CS50's Final Project.</p>
+    <p class="text-center mb-5">See source code on <a href="https://github.com/marcusmerkel/gcal-parse" target="_blank">GitHub</a> ... or just <strong>try it!</strong></p>
+    <hr class="pattern mb-5">
+    <div class="container w-75 mx-auto">
+        <form action="/" method="POST">
+            <div class="form-group">
+                <label for="calendarID">Calendar ID</label>
+                <input type="text" autocomplete="on" class="form-control" id="calendarID" name="calendarID">
+                <small id="calendarIDhelp" class="form-text text-muted">The calendar ID of the Google Calendar to parse (you'll find this on <a href="https://calendar.google.com/" target="_blank">https://calendar.google.com/</a> in "My calendars" -> Options -> Settings and sharing -> Scroll down to Calendar ID).</small>
+                <div class="valid-feedback">
+                    Looks good!
+                </div>
+                <div class="invalid-feedback">
+                    Please provide a Google calendar ID.
                 </div>
             </div>
-            <div class="event-text col-10 col-xs-10 col-sm-10 col-md-10 align-middle border-left" style="border-color: lightgrey;">
-                <div class="row event-top align-items-center">
-                    <div class="col-xs-10 col-sm-10 col-md-3 col-lg-3 my-auto">
-                        <p class="mb-0">{{ event['start_weekday'] }}<br />{{ event['start_time'] }} {%- if event['end_time'] != "" %} - {{ event['end_time'] }} {%- endif %} {%- if event['type'] != "" -%}<br />
-                            {{ event['type'] }} {%- endif -%}
-                        </p>
-                    </div>
-                    <div class="col-xs-12 col-sm-10 col-md-6 col-lg-7 my-2 align-middle">
-                        <h3 style="white-space: pre-wrap;">{{ event['title'] }}</h3>
-                        <h5 class="mt-2">{{ event['locationName'] }}</h5>
-                    </div>
-                    {% if event['location'] != "" and event['description'] != "" %}
-                    <div class="col-xs-4 col-sm-3 col-md-3 col-lg-2 text-center ">
-                        <a href="#{{ event['start_dttm_iso'] }}" class="learnMore btn btn-outline-secondary align-bottom">Mehr</a>
-                    </div>
-                    {% endif %}
+            <div class="form-group">
+                <label for="maxNum">Number of Events</label>
+                <input autocomplete="off" class="form-control" id="maxNum" name="maxNum" type="number">
+                <small id="maxNumHelp" class="form-text text-muted">The maximum number of events you want to parse</small>
+                <div class="valid-feedback">
+                    Looks good!
+                  </div>
+                <div class="invalid-feedback">
+                    Please provide a number of events.
                 </div>
-
-                {% if event['location'] != "" and event['description'] != "" %}
-                <div class="row row-cal-detail mt-3 collapse">
-                    <div class="container row">
-                        <div class="col-12">
-                            <hr>
-                            <p style="white-space: pre-wrap;">{{ event['description']|safe }}</p>
-                            {% if event['location'] != "" %}<hr>{% endif %}
-                        </div>
-                    </div>
-                    {% if event['location'] != "" %}
-                    <div class="container row">
-                        <div class="col-sm-2 col-xs-10 d-block align-middle text-center my-auto ml-2">
-                            <img class="align-middle" src="static/resources/iconfinder_location_115718.svg">
-                        </div>
-                        <div class="col-sm-6 col-xs-10">
-                            <p class="mb-0"><strong>{{ event['locationName'] }}</strong> <br />{{ event['locationAddress'] }}</p>
-                        </div>
-                        <div class="col-sm-3 col-xs-3 align-bottom">
-                            <a href="{{ event['locationMapsSearch'] }}" target="_blank">Auf Google Maps ansehen</a>
-                        </div>
-                    </div>
-                    {% endif %}
-                </div>
-                {% endif %}
             </div>
-        </div>
+
+            <div class="form-group">
+                <a href="#performer" id="performerButton" class="btn btn-outline-secondary">Add a "Performer" for all events (optional)</a> 
+            </div>
+            <div class="form-group" id="performer">
+                <label for="performerName">Performer Full Name</label>
+                <input type="text" class="form-control" id="performerName" name="performerName">
+                <small id="performerNameHelp" class="form-text text-muted">Full name of the performer as in #Given Name(s)# #Family Name#. Optional.</small>
+            </div>
+
+            <div class="form-group">
+                <a href="#category" id="categoryButton" class="btn btn-outline-secondary">Add Categories for your events (optional)</a> 
+            </div>
+            <div class="form-group" id="category">
+                <label for="categories">Event Categories</label>
+                <input type="text" class="form-control" id="categories" name="categories">
+                <small id="categoriesHelp" class="form-text text-muted">Enter comma-separated categories which the script should be looking for in event descriptions. Like "opera, operetta, musical". Optional.</small>
+            </div>
+            <button class="btn btn-primary mt-2 mb-5" id="goButton" type="submit" disabled>Go for it</button>
+        </form>
     </div>
-
-{% endfor %}
 </div>
 
 <script>
-    $('div.row-cal-detail').hide();
-    
-    $('.learnMore').click(function() {
-        var btn = $(this);
-        var listItem = btn.parents('.calendar-list-item')
-        var detail = listItem.find('.row-cal-detail');
-        var currentOffset = $(this).offset().top - $(document).scrollTop();
-        if (detail.is(":visible")) {
-            detail.hide(500);
-            btn.text("Mehr");
+    $(document).ready(function () {
+        $('#performer').hide()
+        $('#category').hide()
+    });
+
+    $('#calendarID').focusout(function() {
+        if ($(this).val() != "" ) {
+            $(this).removeClass("is-invalid");
+            $(this).addClass("is-valid");
+        } else {
+            $(this).removeClass("is-valid");
+            $(this).addClass("is-invalid");
+        }
+        if (($('#calendarID').val() != "") && ($('#maxNum').val() != "")) {
+            $('#goButton').prop('disabled', false);
         }
         else {
-            detail.show(500);
-            btn.text("Weniger");
+            $('#goButton').prop('disabled', true);
         }
-        $(document).scrollTop(currentOffset);
-        
     });
+    $('#maxNum').focusout(function() {
+        if ($(this).val() != "" ) {
+            $(this).removeClass("is-invalid");
+            $(this).addClass("is-valid");
+        } else {
+            $(this).removeClass("is-valid");
+            $(this).addClass("is-invalid");
+        }
+        if (($('#calendarID').val() != "") && ($('#maxNum').val() != "")) {
+            $('#goButton').prop('disabled', false);
+        }
+        else {
+            $('#goButton').prop('disabled', true);
+        }
+    });
+
+    $('#performerButton').click(function() {
+        $('#performerButton').hide();
+        $('#performer').show();
+    });
+
+    $('#categoryButton').click(function() {
+        $('#categoryButton').hide();
+        $('#category').show();
+    })
+
 </script>
+
 {% endblock %}

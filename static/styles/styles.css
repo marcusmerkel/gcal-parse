@@ -1,7 +1,0 @@
-div.metadata {
-    display: none !important;
-}
-
-.calendar-list-item:hover {
-    transform: translate3d(0, 0, 10px)
-}
