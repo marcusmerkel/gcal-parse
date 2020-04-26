@@ -8,7 +8,7 @@
 <div class="container calendar-list bg-white pattern-cross-dots-md py-1 mx-auto">
 {% for event in eventList %}
 
-    <div id="{{ event['start_dttm_iso']}}" class="container calendar-list-item shadow-sm p-3 my-5 bg-white rounded">
+    <div id="{{ event['start_dttm_iso']}}" class="container calendar-list-item shadow-sm p-3 my-3 bg-white rounded">
         <div class="metadata" itemscope="" itemtype="http://schema.org/Event">
             <span itemprop="name">{{ event['title'] }}</span>
             <span itemprop="startDate">{{ event['start_dttm_iso'] }}</span>
@@ -30,41 +30,46 @@
                 <span itemprop="address">{{ event['locationAddress'] }}</span>      
             </span>
         </div>
-        <div class="row">
-            <div class="event-date col-xs-2 col-md-2 align-middle mt-2 border-right" style="border-color: lightgrey;">
-                <span class="h2 d-block text-center">{{ event['start_day'] }}</span>
-                <span class="h5 d-block text-center">{{ event['start_month'] }}</span>
+        <div class="row align-items-center">
+            <div class="event-date h-auto col-2 col-xs-2 col-sm-2 col-md-2 align-middle mt-2">
+                <div class="align-self-center">
+                    <span class="h1 d-block text-center">{{ event['start_day'] }}</span>
+                    <span class="h5 d-block text-center">{{ event['start_month'] }}</span>
+                </div>
             </div>
-            <div class="col-xs-10 col-md-10 align-middle">
-                <div class="row event-top my-auto">
-                    <div class="col-lg-3 my-auto">
-                        <p class="lead mb-0">{{ event['start_weekday'] }}<br />{{ event['start_time'] }} - {{ event['end_time'] }} {%- if event['type'] != "" -%}<br />
+            <div class="event-text col-10 col-xs-10 col-sm-10 col-md-10 align-middle border-left" style="border-color: lightgrey;">
+                <div class="row event-top align-items-center">
+                    <div class="col-xs-10 col-sm-10 col-md-3 col-lg-3 my-auto">
+                        <p class="mb-0">{{ event['start_weekday'] }}<br />{{ event['start_time'] }} {%- if event['end_time'] != "" %} - {{ event['end_time'] }} {%- endif %} {%- if event['type'] != "" -%}<br />
                             {{ event['type'] }} {%- endif -%}
                         </p>
                     </div>
-                    <div class="col-lg-7 align-middle">
-                        <h3>{{ event['title'] }}</h3>
+                    <div class="col-xs-12 col-sm-10 col-md-6 col-lg-7 my-2 align-middle">
+                        <h3 style="white-space: pre-wrap;">{{ event['title'] }}</h3>
                         <h5 class="mt-2">{{ event['locationName'] }}</h5>
                     </div>
-                    <div class="col-lg-2 h-100 align-bottom text-center ">
+                    {% if event['location'] != "" and event['description'] != "" %}
+                    <div class="col-xs-4 col-sm-3 col-md-3 col-lg-2 text-center ">
                         <a href="#{{ event['start_dttm_iso'] }}" class="learnMore btn btn-outline-secondary align-bottom">Mehr</a>
                     </div>
+                    {% endif %}
                 </div>
 
+                {% if event['location'] != "" and event['description'] != "" %}
                 <div class="row row-cal-detail mt-3 collapse">
                     <div class="container row">
                         <div class="col-12">
                             <hr>
-                            <p style="white-space: pre-wrap;">{{ event['description'] }}</p>
+                            <p style="white-space: pre-wrap;">{{ event['description']|safe }}</p>
                             {% if event['location'] != "" %}<hr>{% endif %}
                         </div>
                     </div>
                     {% if event['location'] != "" %}
-                    <div class="event-location container row">
-                        <div class="col-sm-1 col-xs-10 d-block align-middle text-center my-auto ml-2">
+                    <div class="container row">
+                        <div class="col-sm-2 col-xs-10 d-block align-middle text-center my-auto ml-2">
                             <img class="align-middle" src="static/resources/iconfinder_location_115718.svg">
                         </div>
-                        <div class="col-sm-7 col-xs-10">
+                        <div class="col-sm-6 col-xs-10">
                             <p class="mb-0"><strong>{{ event['locationName'] }}</strong> <br />{{ event['locationAddress'] }}</p>
                         </div>
                         <div class="col-sm-3 col-xs-3 align-bottom">
@@ -73,6 +78,7 @@
                     </div>
                     {% endif %}
                 </div>
+                {% endif %}
             </div>
         </div>
     </div>

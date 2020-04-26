@@ -62,26 +62,26 @@ def get_dates(max_number):
         end = event['end'].get('dateTime', event['end'].get('date'))
         end_dttm = datetime.fromisoformat(end)
 
-        starttime = event['start'].get('time')
-
         evnt['start_dttm_iso'] = start
         evnt['start_date'] = start_dttm.date().strftime("%d.%m.%Y")
         evnt['start_day'] = start_dttm.date().strftime("%-d")
         evnt['start_month'] = start_dttm.date().strftime("%b")
         evnt['end_dttm_iso'] = end
         evnt['start_weekday'] = start_dttm.time().strftime("%A")
-        if not starttime:
-            evnt['start_time'] = "00:00"
-            evnt['end_time'] = "23:59"
+        if start_dttm.time().strftime("%H:%M") == "00:00" and end_dttm.time().strftime("%H:%M") == "00:00":
+            evnt['start_time'] = "ganztägig"
+            evnt['end_time'] = ""
         else:
             evnt['start_time'] = start_dttm.time().strftime("%H:%M")
             evnt['end_time'] = end_dttm.time().strftime("%H:%M")
 
-        evnt['title'] = event['summary']
+        evnt['title'] = event['summary'].replace(": ", ":\n", 1)
 
         if 'description' in event.keys():
-            evnt['description'] = event['description'].replace("\n\n\n", "\n\n")
             desc = event['description']
+            # replacement not necessary because treating html literally now
+            # desc = desc.replace("<p>", "").replace("</p>", "\n").replace("<br>", "\n")
+            evnt['description'] = desc.replace("\n\n\n", "\n\n")
             if "Operette" in desc:
                 evnt['type'] = "Operette"
             elif "Musical" in desc:
@@ -116,6 +116,7 @@ def get_dates(max_number):
 
     for event in eventList:
         print(event['opus'])
+        print(event['title'])
 
     return eventList
 
